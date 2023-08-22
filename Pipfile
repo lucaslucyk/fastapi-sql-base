@@ -9,6 +9,9 @@ uvicorn = "*"
 alembic = "*"
 sqlalchemy = "*"
 pydantic-settings = "*"
+pytest = "*"
+pytest-asyncio = "*"
+httpx = "*"
 
 [dev-packages]
 
