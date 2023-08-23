@@ -6,7 +6,7 @@ BASE_URL = CURRENT_URL.parent
 
 
 class Settings(BaseSettings):
-    DEBUG: bool = True
+    DEBUG: bool = 1
     API_V1_STR: str = ""
     DB_NAME: str = "db.sqlite3"
     DB_URI: str = f"sqlite+aiosqlite:///{BASE_URL / DB_NAME}"
