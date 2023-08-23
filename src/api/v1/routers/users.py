@@ -1,5 +1,5 @@
 from typing import List
-from fastapi import APIRouter, Depends, Path, Query, status
+from fastapi import APIRouter, Depends, HTTPException, Path, Query, status
 from sqlalchemy.ext.asyncio import AsyncSession
 from api import dependencies as deps
 from schemas import users as user_schemas
@@ -133,3 +133,27 @@ async def update_user(
         obj=user,
         data=data
     )
+
+
+@router.post('/activate', status_code=status.HTTP_200_OK)
+async def activate_user(
+    *,
+    data: user_schemas.UserActivate,
+    db: AsyncSession = Depends(deps.get_db),
+) -> user_schemas.User:
+    """Create user with inner data
+
+    Args:
+        db (AsyncSession, optional):
+            Database Session.
+            Defaults to Depends(deps.get_db).
+        data (user_schemas.UserCreate): User schema data
+
+    Raises:
+        HTTPException: HTTP_400_BAD_REQUEST if item already exists
+
+    Returns:
+        user_schemas.User: User data
+    """
+
+    return await crud_users.activate(db=db, data=data)

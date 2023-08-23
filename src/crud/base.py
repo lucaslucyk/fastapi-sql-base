@@ -24,6 +24,8 @@ class CRUDBase(Generic[ModelType, CreateSchemaType, UpdateSchemaType]):
             model (Type[ModelType]): A SQLAlchemy model class
         """
         self.model = model
+        self.and_ = and_
+        self.or_ = or_
 
 
     async def get(self, db: AsyncSession, id: Any) -> Optional[ModelType]:
@@ -98,7 +100,7 @@ class CRUDBase(Generic[ModelType, CreateSchemaType, UpdateSchemaType]):
         whereclause: Any,
         skip: int = 0,
         limit: int = 100,
-    ) -> Union[List[ModelType], ModelType]:
+    ) -> List[ModelType]:
         """ Get items from database using `filters` to filter
 
         Args:
@@ -112,7 +114,7 @@ class CRUDBase(Generic[ModelType, CreateSchemaType, UpdateSchemaType]):
                 Defaults to True.
 
         Returns:
-            Union[List[ModelType], ModelType]: 
+            List[ModelType]: 
                 Instance or list of intance of matching items.
         """
         
@@ -125,6 +127,48 @@ class CRUDBase(Generic[ModelType, CreateSchemaType, UpdateSchemaType]):
         )
 
         return result.scalars().all()
+    
+
+    async def find(
+        self,
+        db: AsyncSession,
+        *,
+        skip: int = 0,
+        limit: int = 100,
+        **kwargs
+    ) -> List[ModelType]:
+        result = await db.execute(
+            select(self.model)
+            .filter_by(**kwargs)
+            .offset(skip)
+            .limit(limit)
+        )
+        return result.scalars().all()
+    
+
+    async def find_one(self, db: AsyncSession, **kwargs):
+        result = await db.execute(
+            select(self.model)
+            .filter_by(**kwargs)
+            .limit(1)
+        )
+        return result.scalar()
+    
+
+    async def save(
+        self,
+        db: AsyncSession,
+        *,
+        obj: ModelType
+    ) -> ModelType:
+        
+        # add to database
+        db.add(obj)
+        await db.commit()
+        await db.refresh(obj)
+
+        # return instance
+        return obj
     
 
     async def create(
@@ -152,14 +196,16 @@ class CRUDBase(Generic[ModelType, CreateSchemaType, UpdateSchemaType]):
             # obj_data = jsonable_encoder(obj)
             db_obj = self.model(**jsonable_encoder(data))
             
-            # add to database
-            db.add(db_obj)
-            await db.commit()
-            await db.refresh(db_obj)
+            # # add to database
+            # db.add(db_obj)
+            # await db.commit()
+            # await db.refresh(db_obj)
 
-            # return instance
-            return db_obj
+            # # return instance
+            # return db_obj
             
+            return await self.save(db=db, obj=db_obj)
+
         except IntegrityError:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
@@ -201,13 +247,7 @@ class CRUDBase(Generic[ModelType, CreateSchemaType, UpdateSchemaType]):
         for field, value in update_data.items():
             setattr(obj, field, value)
 
-        # save, commit and refresh session
-        db.add(obj)
-        await db.commit()
-        await db.refresh(obj)
-
-        # return updated object
-        return obj
+        return await self.save(db=db, obj=obj)
     
 
     async def delete(self, db: AsyncSession, *, id: int) -> ModelType:

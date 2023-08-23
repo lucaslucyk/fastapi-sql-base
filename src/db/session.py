@@ -6,7 +6,7 @@ from sqlalchemy.ext.asyncio import (
     async_sessionmaker
 )
 
-from conf.config import settings
+from core.config import settings
 
 
 # async sqlite session

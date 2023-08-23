@@ -12,6 +12,12 @@ pydantic-settings = "*"
 pytest = "*"
 pytest-asyncio = "*"
 httpx = "*"
+cryptography = "*"
+pyjwt = "*"
+typer = "*"
+passlib = "*"
+sqlalchemy-utils = "*"
+pydantic = {extras = ["email"], version = "*"}
 
 [dev-packages]
 ipykernel = "*"
