@@ -1,5 +1,5 @@
 from fastapi.testclient import TestClient
-from core.config import settings
+from conf.config import settings
 
 
 def test_home(client: TestClient) -> None:

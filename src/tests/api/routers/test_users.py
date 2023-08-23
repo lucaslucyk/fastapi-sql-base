@@ -1,7 +1,7 @@
 from fastapi import status
 from fastapi.testclient import TestClient
 from schemas.users import UserCreate, UserUpdate, User
-from core.config import settings
+from conf.config import settings
 
 
 def test_users_list(client: TestClient) -> None:

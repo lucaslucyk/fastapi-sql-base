@@ -25,7 +25,7 @@ sys.path.append(str(BASE_URL))
 from db import Base
 from main import app
 from api.dependencies import get_db
-from core.config import settings
+from conf.config import settings
 
 
 # async sqlite session
